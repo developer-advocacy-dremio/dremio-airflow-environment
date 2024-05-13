@@ -1,0 +1,38 @@
+version: "3"
+services:
+  webserver:
+    build:
+      dockerfile: dockerfile
+      context: .
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__FERNET_KEY=FB0o_zt4e3Ziq3LdUUO7F2Z95cvFFx16hU8jTeR1ASM=
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow_data:/opt/airflow/
+    ports:
+      - "8999:8080"
+    command: /bin/bash /opt/airflow/init/webserverinit.bash
+  scheduler:
+    build:
+      dockerfile: dockerfile
+      context: .
+    depends_on: 
+      - webserver
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__FERNET_KEY=FB0o_zt4e3Ziq3LdUUO7F2Z95cvFFx16hU8jTeR1ASM=
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - airflow_data:/opt/airflow/
+    command: /bin/bash /opt/airflow/init/schedulerinit.bash
+
+volumes:
+  airflow_data:
+    name: airflow_shared_data
